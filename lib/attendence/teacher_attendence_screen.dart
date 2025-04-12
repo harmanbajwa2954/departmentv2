@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class TeacherAttendanceScreen extends StatefulWidget {
   final String teacherId;
 
-  const TeacherAttendanceScreen({required this.teacherId, Key? key}) : super(key: key);
+  const TeacherAttendanceScreen({required this.teacherId, super.key});
 
   @override
   State<TeacherAttendanceScreen> createState() => _TeacherAttendanceScreenState();
@@ -16,7 +16,7 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> with 
   // Controllers for Create Tab
   final TextEditingController _sectionNameController = TextEditingController();
   final TextEditingController _studentNameController = TextEditingController();
-  List<String> _students = [];
+  final List<String> _students = [];
 
   // For Mark Attendance Tab
   String? selectedSectionId;

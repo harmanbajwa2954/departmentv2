@@ -100,11 +100,15 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
 // Placeholder Screens (Should be implemented separately)
 class ApproveMaterialsScreen extends StatelessWidget {
+  const ApproveMaterialsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Approve Study Materials')));
 }
 
 class ManageAttendanceScreen extends StatelessWidget {
+  const ManageAttendanceScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,21 +135,29 @@ class ManageAttendanceScreen extends StatelessWidget {
 
 
 class ViewComplaintsScreen extends StatelessWidget {
+  const ViewComplaintsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('View Complaints')));
 }
 
 class ReviewSubmissionsScreen extends StatelessWidget {
+  const ReviewSubmissionsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Review Student Submissions')));
 }
 
 class SendAnnouncementsScreen extends StatelessWidget {
+  const SendAnnouncementsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Send Announcements')));
 }
 
 class AttendanceAnalyticsScreen extends StatelessWidget {
+  const AttendanceAnalyticsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Attendance Analytics (AI)')));
 }
@@ -156,11 +168,15 @@ class AttendanceAnalyticsScreen extends StatelessWidget {
 // }
 
 class TimetableScreen extends StatelessWidget {
+  const TimetableScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Timetable')));
 }
 
 class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Notifications')));
 }

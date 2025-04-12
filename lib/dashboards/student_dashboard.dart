@@ -164,36 +164,48 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
 // Placeholder Screens
 class AttendanceScreen extends StatelessWidget {
+  const AttendanceScreen({super.key});
+
   @override
   Widget build(BuildContext context) =>
       Scaffold(appBar: AppBar(title: const Text('Attendance Tracking')));
 }
 
 class TaskManagerScreen extends StatelessWidget {
+  const TaskManagerScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(title: const Text('Task Manager & Notifications')));
 }
 
 class AttendancePredictionScreen extends StatelessWidget {
+  const AttendancePredictionScreen({super.key});
+
   @override
   Widget build(BuildContext context) =>
       Scaffold(appBar: AppBar(title: const Text('AI Attendance Prediction')));
 }
 
 class SmartStudyMaterialScreen extends StatelessWidget {
+  const SmartStudyMaterialScreen({super.key});
+
   @override
   Widget build(BuildContext context) =>
       Scaffold(appBar: AppBar(title: const Text('Smart Study Material (AI)')));
 }
 
 class TimetableScreen extends StatelessWidget {
+  const TimetableScreen({super.key});
+
   @override
   Widget build(BuildContext context) =>
       Scaffold(appBar: AppBar(title: const Text('Timetable')));
 }
 
 class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
+
   @override
   Widget build(BuildContext context) =>
       Scaffold(appBar: AppBar(title: const Text('Notifications')));

@@ -98,41 +98,57 @@ class _HODDashboardState extends State<HODDashboard> {
 
 // Placeholder Screens (Should be implemented separately)
 class OverseeTeachersScreen extends StatelessWidget {
+  const OverseeTeachersScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Oversee Teacher Activity')));
 }
 
 class EscalatedComplaintsScreen extends StatelessWidget {
+  const EscalatedComplaintsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Handle Escalated Complaints')));
 }
 
 class DepartmentInsightsScreen extends StatelessWidget {
+  const DepartmentInsightsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('View Department Insights')));
 }
 
 class ApproveMaterialsScreen extends StatelessWidget {
+  const ApproveMaterialsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Approve Study Materials')));
 }
 
 class PerformanceReportsScreen extends StatelessWidget {
+  const PerformanceReportsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Performance Reports & Analytics')));
 }
 
 class SendAnnouncementsScreen extends StatelessWidget {
+  const SendAnnouncementsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Send Announcements')));
 }
 
 class AIDepartmentAnalyticsScreen extends StatelessWidget {
+  const AIDepartmentAnalyticsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('AI-Powered Department Analytics')));
 }
 
 class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
+
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text('Notifications')));
 }

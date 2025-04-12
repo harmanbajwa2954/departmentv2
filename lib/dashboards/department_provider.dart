@@ -8,7 +8,7 @@ class Department {
 }
 
 class DepartmentProvider extends ChangeNotifier {
-  List<Department> _departments = [
+  final List<Department> _departments = [
     Department(name: 'HR', head: 'Alice'),
     Department(name: 'Finance', head: 'Bob'),
     Department(name: 'IT', head: 'Charlie'),
