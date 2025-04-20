@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:department/widgets/button.dart';
 import 'package:department/widgets/textfield.dart';
 import 'package:department/auth/auth_service.dart';
@@ -24,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   String _errorMessage = '';
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -35,24 +38,50 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
+      backgroundColor: Colors.grey[100],
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         child: Column(
           children: [
-            const Spacer(),
-            const Text("Login",
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 50),
+            const SizedBox(height: 80),
+            const SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.only(top: 40, bottom: 20),
+              child: Image.asset(
+                'lib/assets/ucoe'
+                    '.png',
+                height: MediaQuery.of(context).size.height * 0.25, // 25% of screen height
+                width: MediaQuery.of(context).size.width * 0.8,     // 80% of screen width
+                fit: BoxFit.contain,
+              ),
+            ),
+
+            Text(
+              "Welcome Back 👋",
+              style: GoogleFonts.poppins(
+                fontSize: 32,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Login to continue",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 40),
 
             CustomTextField(
-              hint: "Enter Email",
+              hint: "Enter your email",
               label: "Email",
               controller: _email,
             ),
             const SizedBox(height: 20),
 
             CustomTextField(
-              hint: "Enter Password",
+              hint: "Enter your password",
               label: "Password",
               isPassword: true,
               controller: _password,
@@ -60,40 +89,37 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
 
             if (_errorMessage.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  _errorMessage,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+              Text(
+                _errorMessage,
+                style: const TextStyle(color: Colors.red),
               ),
 
-            CustomButton(
+            const SizedBox(height: 20),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : CustomButton(
               label: "Login",
               onPressed: _login,
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 20),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text("Don't have an account? "),
-                InkWell(
+                GestureDetector(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SignupScreen()),
+                    MaterialPageRoute(builder: (_) => const SignupScreen()),
                   ),
                   child: const Text(
-                    "Signup",
-                    style: TextStyle(color: Colors.red),
+                    "Sign up",
+                    style: TextStyle(color: Colors.deepPurple),
                   ),
-                )
+                ),
               ],
             ),
-            const Spacer(),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -103,6 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     setState(() {
       _errorMessage = '';
+      _isLoading = true;
     });
 
     try {
@@ -129,19 +156,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 builder: (_) => StudentDashboard(name: name, rollNo: rollNo),
               ),
             );
-          } else if (role == 'teacher') {
+          } else if (role == 'teacher' || role == 'Teacher') {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (_) => TeacherDashboard(),
-              ),
+              MaterialPageRoute(builder: (_) => const TeacherDashboard()),
             );
-          } else if (role == 'hod') {
+          } else if (role == 'hod' || role == 'HOD') {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (_) => HODDashboard(),
-              ),
+              MaterialPageRoute(builder: (_) => const HODDashboard()),
             );
           } else {
             setState(() {
@@ -155,13 +178,17 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = "Login failed. Please check your credentials.";
+          _errorMessage = "Invalid credentials. Please try again.";
         });
       }
     } catch (e) {
       log("Login Error: $e");
       setState(() {
         _errorMessage = e.toString().split('] ').last;
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
