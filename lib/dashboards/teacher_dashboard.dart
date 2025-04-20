@@ -1,3 +1,4 @@
+import 'package:department/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:department/attendence/teacher_attendence_screen.dart';
 import 'package:department/auth/auth_service.dart';
@@ -114,7 +115,7 @@ class ManageAttendanceScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Manage Attendance')),
       body: Center(
-        child: ElevatedButton(
+        child: CustomButton(
           onPressed: () {
             final currentUser = AuthService().getCurrentUser();
             final teacherId = currentUser?.uid ?? 'unknown'; // fallback just in case
@@ -122,11 +123,11 @@ class ManageAttendanceScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TeacherAttendanceScreen(teacherId: teacherId),
+                builder: (_) => const TeacherAttendanceUI(),
               ),
             );
           },
-          child: Text("Mark Attendance"),
+          label: 'Submit Attendence',
         ),
       ),
     );

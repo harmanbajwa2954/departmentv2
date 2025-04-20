@@ -1,9 +1,11 @@
+import 'package:department/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:department/auth/auth_service.dart';
 import 'package:department/auth/login_screen.dart';
 import 'package:department/student/study_material_screen.dart';
 import 'package:department/student/complaint_screen.dart';
 import 'package:department/student/lost_found_screen.dart';
+import 'package:department/attendence/student_attendence_screen.dart';
 
 class StudentDashboard extends StatefulWidget {
   final bool advanced;
@@ -168,7 +170,21 @@ class AttendanceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      Scaffold(appBar: AppBar(title: const Text('Attendance Tracking')));
+      Scaffold(
+          appBar: AppBar(
+          title: const Text('Attendance Tracking')
+          ),
+          body: Center(
+            child:
+              CustomButton(label: 'ViewAttendence', onPressed : (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StudentAttendanceUI()),
+                );
+              }),
+          ),
+
+      );
 }
 
 class TaskManagerScreen extends StatelessWidget {
