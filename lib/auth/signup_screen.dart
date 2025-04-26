@@ -23,6 +23,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _password = TextEditingController();
   final _rollNo = TextEditingController();
 
+
   String _selectedRole = 'Student';
   final List<String> _roles = ['Student', 'Teacher', 'HOD'];
 
@@ -36,6 +37,14 @@ class _SignupScreenState extends State<SignupScreen> {
     _rollNo.dispose();
     super.dispose();
   }
+  String? _selectedCourse;
+  String? _selectedSem;
+  String? _selectedSection;
+
+  final List<String> _courses = ['Civil Engineering','Computer Science', 'Electronics & Communication', 'Electrical', 'Mechanical Engineering'];
+  final List<String> _semesters = ['1st Semester', '2nd Semester', '3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester'];
+  final List<String> _sections = ['12', '34', '56','78'];
+
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +125,62 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 20),
               ],
+              if (_selectedRole == 'Student') ...[
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select Course",
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _selectedCourse,
+                  items: _courses.map((course) => DropdownMenuItem(
+                    value: course,
+                    child: Text(course),
+                  )).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCourse = value!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select Year",
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _selectedSem,
+                  items: _semesters.map((year) => DropdownMenuItem(
+                    value: year,
+                    child: Text(year),
+                  )).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSem = value!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select Section",
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _selectedSection,
+                  items: _sections.map((section) => DropdownMenuItem(
+                    value: section,
+                    child: Text(section),
+                  )).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSection = value!;
+                    });
+                  },
+                ),
+              ],
+
               if (_errorMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -191,7 +256,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
         // Add rollNo for students only
         if (role == 'student') {
-          userData['rollNo'] = _rollNo.text.trim();
+          userData.addAll({
+            'rollNo': _rollNo.text.trim(),
+            'course': _selectedCourse,
+            'year': _selectedSem,
+            'section': _selectedSection,
+          });
         }
 
         await _firestore.collection('users').doc(user.uid).set(userData);

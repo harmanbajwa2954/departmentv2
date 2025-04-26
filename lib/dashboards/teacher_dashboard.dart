@@ -2,6 +2,8 @@ import 'package:department/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:department/attendence/teacher_attendence_screen.dart';
 import 'package:department/auth/auth_service.dart';
+import 'package:department/auth/login_screen.dart';
+
 
 class TeacherDashboard extends StatefulWidget {
   final bool advanced;
@@ -12,12 +14,28 @@ class TeacherDashboard extends StatefulWidget {
 }
 
 class _TeacherDashboardState extends State<TeacherDashboard> {
+  final AuthService _authService = AuthService();
+
+  void _signOut() async {
+    await _authService.signout();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Teacher Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _signOut,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -123,7 +141,7 @@ class ManageAttendanceScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const TeacherAttendanceUI(),
+                builder: (_) => const TeacherMarkAttendanceScreen(),
               ),
             );
           },

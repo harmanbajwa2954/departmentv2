@@ -1,121 +1,196 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:department/widgets/button.dart';
+// import 'package:department/widgets/textfield.dart';
 
-
-class TeacherAttendanceUI extends StatefulWidget {
-  const TeacherAttendanceUI({super.key});
+class TeacherMarkAttendanceScreen extends StatefulWidget {
+  const TeacherMarkAttendanceScreen({super.key});
 
   @override
-  State<TeacherAttendanceUI> createState() => _TeacherAttendanceUIState();
+  State<TeacherMarkAttendanceScreen> createState() => _TeacherMarkAttendanceScreenState();
 }
 
-class _TeacherAttendanceUIState extends State<TeacherAttendanceUI> {
+class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScreen> {
   String? selectedCourse;
-  String? selectedYear;
+  String? selectedSem;
   String? selectedSection;
+  final List<String> subjects = ['Computer Networks', 'Data Structures', 'Operating Systems'];
+  String? selectedSubject;
 
-  final List<String> courses = ['ComputerScience', 'Mechanical', 'ECE' ,'Civil' , 'ECM'];
-  final List<String> years = ['1st Year', '2nd Year', '3rd Year' , '4th Year'];
+
+  final List<String> courses = ['Civil Engineering','Computer Science', 'Electronics & Communication', 'Electrical', 'Mechanical Engineering'];
+  final List<String> semesters = ['1st Semester', '2nd Semester', '3rd Semester', '4th Semester', '5th Semester', '6th Semester', '7th Semester', '8th Semester'];
   final List<String> sections = ['12', '34', '56','78'];
 
-  // Mock student data for demo
   List<Map<String, dynamic>> students = [];
-
   Map<String, bool> attendanceMap = {};
 
-  void loadStudents() {
-    // This would be replaced with a Firestore call later
-    students = List.generate(10, (index) => {
-      'id': 'stu_$index',
-      'name': 'Student ${index + 1}',
-    });
+  void loadStudentsFromFirestore() async {
+    if (selectedCourse == null || selectedSem == null || selectedSection == null) return;
 
-    attendanceMap = {
-      for (var student in students) student['id']: false,
-    };
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'student')
+          .where('course', isEqualTo: selectedCourse)
+          .where('year', isEqualTo: selectedSem)
+          .where('section', isEqualTo: selectedSection)
+          .get();
 
-    setState(() {});
+      students = snapshot.docs.map((doc) => {
+        'id': doc.id,
+        'name': doc['name'],
+      }).toList();
+
+      attendanceMap = {
+        for (var student in students) student['id']: false,
+      };
+
+      setState(() {});
+    } catch (e) {
+      print("Error loading students: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to load students')),
+      );
+    }
   }
 
-  void submitAttendance() {
-    print('Attendance Submitted:');
-    attendanceMap.forEach((id, present) {
-      final student = students.firstWhere((s) => s['id'] == id);
-      print('${student['name']} - ${present ? "Present" : "Absent"}');
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Attendance submitted (mock)')),
-    );
+
+  void submitAttendance() async {
+    if (selectedCourse == null || selectedSem == null || selectedSection == null || selectedSubject == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select course, year, section and subject')),
+      );
+      return;
+    }
+
+    final date = DateTime.now();
+    final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+    try {
+      for (var entry in attendanceMap.entries) {
+        final studentId = entry.key;
+        final isPresent = entry.value;
+
+        final attendanceRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(studentId)
+            .collection('attendance')
+            .doc(selectedSubject!)  // ✅ Now grouped under subject
+            .collection('records')
+            .doc(dateString);
+
+        await attendanceRef.set({
+          'status': isPresent ? 'Present' : 'Absent',
+          'timestamp': FieldValue.serverTimestamp(),
+          'course': selectedCourse,
+          'year': selectedSem,
+          'section': selectedSection,
+          'subject': selectedSubject,
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Attendance submitted successfully!')),
+      );
+
+      setState(() {
+        students.clear();
+        attendanceMap.clear();
+        selectedSubject = null;
+      });
+    } catch (e) {
+      print('Error submitting attendance: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to submit attendance')),
+      );
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Mark Attendance")),
+      appBar: AppBar(title: const Text("Mark Attendance")),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Course Dropdown
+            // Dropdowns
             DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: 'Select Course'),
               value: selectedCourse,
-              decoration: InputDecoration(labelText: 'Select Course'),
               items: courses.map((course) => DropdownMenuItem(
                 value: course,
                 child: Text(course),
               )).toList(),
-              onChanged: (val) {
+              onChanged: (value) {
                 setState(() {
-                  selectedCourse = val;
+                  selectedCourse = value!;
                 });
               },
             ),
             const SizedBox(height: 10),
-
-            // Year Dropdown
             DropdownButtonFormField<String>(
-              value: selectedYear,
-              decoration: InputDecoration(labelText: 'Select Year'),
-              items: years.map((year) => DropdownMenuItem(
-                value: year,
-                child: Text(year),
+              decoration: const InputDecoration(labelText: 'Select Semester'),
+              value: selectedSem,
+              items: semesters.map((semester) => DropdownMenuItem(
+                value: semester,
+                child: Text(semester),
               )).toList(),
-              onChanged: (val) {
+              onChanged: (value) {
                 setState(() {
-                  selectedYear = val;
+                  selectedSem = value!;
                 });
               },
             ),
             const SizedBox(height: 10),
-
-            // Section Dropdown
             DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: 'Select Section'),
               value: selectedSection,
-              decoration: InputDecoration(labelText: 'Select Section'),
               items: sections.map((section) => DropdownMenuItem(
                 value: section,
                 child: Text(section),
               )).toList(),
-              onChanged: (val) {
+              onChanged: (value) {
                 setState(() {
-                  selectedSection = val;
-                  loadStudents();
+                  selectedSection = value!;
+                  loadStudentsFromFirestore();
                 });
               },
             ),
             const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
-            // Student list with switches
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(labelText: 'Select Subject'),
+              value: selectedSubject,
+              items: subjects.map((subject) => DropdownMenuItem(
+                value: subject,
+                child: Text(subject),
+              )).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedSubject = value!;
+                  loadStudentsFromFirestore(); // ⚡ Only load students once everything is selected
+                });
+              },
+            ),
+
+            // Students List
             if (students.isNotEmpty)
               Expanded(
                 child: ListView.builder(
                   itemCount: students.length,
                   itemBuilder: (context, index) {
                     final student = students[index];
+                    final isPresent = attendanceMap[student['id']] ?? false;
+
                     return ListTile(
                       title: Text(student['name']),
                       trailing: Switch(
-                        value: attendanceMap[student['id']] ?? false,
+                        value: isPresent,
                         onChanged: (val) {
                           setState(() {
                             attendanceMap[student['id']] = val;
@@ -130,7 +205,7 @@ class _TeacherAttendanceUIState extends State<TeacherAttendanceUI> {
             if (students.isNotEmpty)
               CustomButton(
                 onPressed: submitAttendance,
-                label: 'Submit Attendence',
+                label: 'Submit Attendance',
               ),
           ],
         ),
