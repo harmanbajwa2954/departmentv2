@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:department/widgets/button.dart';
+// import 'package:department/widgets/textfield.dart';
 
 class ManageSubjectsScreen extends StatefulWidget {
   const ManageSubjectsScreen({super.key});
@@ -55,7 +57,6 @@ class _ManageSubjectsScreenState extends State<ManageSubjectsScreen> {
 
       setState(() {}); // Refresh UI
     } catch (e) {
-      print('Error adding subject: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to add subject')),
       );
@@ -127,9 +128,9 @@ class _ManageSubjectsScreenState extends State<ManageSubjectsScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                ElevatedButton(
+                CustomButton(
                   onPressed: addSubject,
-                  child: const Text('Add'),
+                  label: 'Add',
                 ),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'auth_service.dart';
 import 'login_screen.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:department/home_screen.dart';
 import 'package:department/widgets/button.dart';
@@ -28,6 +29,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final List<String> _roles = ['Student', 'Teacher', 'HOD'];
 
   String _errorMessage = '';
+  final bool _isLoading = false;
+
 
   @override
   void dispose() {
@@ -48,6 +51,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -82,16 +86,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 controller: _password,
               ),
               const SizedBox(height: 20),
-
-              // // 👇 Show Roll No. field only if Student is selected
-              // if (_selectedRole == 'Student') ...[
-              //   CustomTextField(
-              //     hint: "Enter Roll No.",
-              //     label: "Roll No.",
-              //     controller: _rollNo,
-              //   ),
-              //   const SizedBox(height: 20),
-              // ],
 
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(
@@ -193,11 +187,13 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
 
-              CustomButton(
-                label: "Signup",
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : CustomButton(
+                label: "Sign Up",
                 onPressed: _signup,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
