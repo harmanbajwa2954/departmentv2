@@ -21,6 +21,12 @@ class CustomTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue, width: 2)
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue,width: 2)
+        ),
         prefixIcon: isPassword ? Icon(Icons.lock) : null,
       ),
     );

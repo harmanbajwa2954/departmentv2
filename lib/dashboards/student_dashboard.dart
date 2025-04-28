@@ -1,4 +1,4 @@
-import 'package:department/widgets/button.dart';
+// import 'package:department/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:department/auth/auth_service.dart';
 import 'package:department/auth/login_screen.dart';
@@ -6,6 +6,9 @@ import 'package:department/student/study_material_screen.dart';
 import 'package:department/student/complaint_screen.dart';
 import 'package:department/student/lost_found_screen.dart';
 import 'package:department/attendence/student_attendence_screen.dart';
+import 'package:department/student/TaskNotificationManagerScreen.dart';
+import 'package:department/student/smart_study_material_screen.dart';
+import 'package:department/student/attendence_prediction_screen.dart';
 
 class StudentDashboard extends StatefulWidget {
   final bool advanced;
@@ -101,7 +104,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
 
             // Dashboard Options
             _buildDashboardOption(Icons.calendar_today, 'View Attendance',
-                AttendanceScreen()),
+                StudentAttendanceUI()),
             _buildDashboardOption(
                 Icons.menu_book,
                 'Study Materials',
@@ -115,7 +118,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 'Lost & Found',
                 LostFoundScreen(name: widget.name, rollNo: widget.rollNo)),
             _buildDashboardOption(Icons.task, 'Task Manager & Notifications',
-                TaskManagerScreen()),
+                TaskNotificationManagerScreen(rollNo: widget.rollNo)),
             _buildDashboardOption(Icons.trending_up,
                 'Attendance Prediction (AI)', AttendancePredictionScreen()),
             _buildDashboardOption(Icons.school, 'Smart Study Material (AI)',
@@ -162,53 +165,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
       ),
     );
   }
-}
-
-// Placeholder Screens
-class AttendanceScreen extends StatelessWidget {
-  const AttendanceScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(
-          appBar: AppBar(
-          title: const Text('Attendance Tracking')
-          ),
-          body: Center(
-            child:
-              CustomButton(label: 'ViewAttendence', onPressed : (){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const StudentAttendanceUI()),
-                );
-              }),
-          ),
-
-      );
-}
-
-class TaskManagerScreen extends StatelessWidget {
-  const TaskManagerScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(title: const Text('Task Manager & Notifications')));
-}
-
-class AttendancePredictionScreen extends StatelessWidget {
-  const AttendancePredictionScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(appBar: AppBar(title: const Text('AI Attendance Prediction')));
-}
-
-class SmartStudyMaterialScreen extends StatelessWidget {
-  const SmartStudyMaterialScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) =>
-      Scaffold(appBar: AppBar(title: const Text('Smart Study Material (AI)')));
 }
 
 class TimetableScreen extends StatelessWidget {

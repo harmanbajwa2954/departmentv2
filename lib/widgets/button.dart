@@ -16,11 +16,11 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           elevation: 3,
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: Colors.blue,
           foregroundColor: Colors.white, // ✅ ensures white text
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(15),
           ),
         ),
         onPressed: onPressed,
