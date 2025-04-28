@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:department/attendence/teacher_attendence_screen.dart';
 import 'package:department/auth/auth_service.dart';
 import 'package:department/auth/login_screen.dart';
+import 'package:department/attendence/manage_subjects_screen.dart';
 
 
 class TeacherDashboard extends StatefulWidget {
@@ -133,19 +134,33 @@ class ManageAttendanceScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Manage Attendance')),
       body: Center(
-        child: CustomButton(
-          onPressed: () {
-            final currentUser = AuthService().getCurrentUser();
-            final teacherId = currentUser?.uid ?? 'unknown'; // fallback just in case
+        child: Column(
+          children: [CustomButton(
+            onPressed: () {
+              final currentUser = AuthService().getCurrentUser();
+              final teacherId = currentUser?.uid ?? 'unknown'; // fallback just in case
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const TeacherMarkAttendanceScreen(),
-              ),
-            );
-          },
-          label: 'Submit Attendence',
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const TeacherMarkAttendanceScreen(),
+                ),
+              );
+            },
+            label: 'Submit Attendence',
+          ),
+
+            CustomButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ManageSubjectsScreen()),
+                );
+              },
+              label: 'Manage Subjects',
+            ),
+
+          ]
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:department/widgets/button.dart';
+import 'package:department/auth/auth_service.dart';
+
 // import 'package:department/widgets/textfield.dart';
 
 class TeacherMarkAttendanceScreen extends StatefulWidget {
@@ -14,8 +16,8 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
   String? selectedCourse;
   String? selectedSem;
   String? selectedSection;
-  final List<String> subjects = ['Computer Networks', 'Data Structures', 'Operating Systems'];
   String? selectedSubject;
+
 
 
   final List<String> courses = ['Civil Engineering','Computer Science', 'Electronics & Communication', 'Electrical', 'Mechanical Engineering'];
@@ -48,7 +50,7 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
 
       setState(() {});
     } catch (e) {
-      print("Error loading students: $e");
+      // print("Error loading students: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load students')),
       );
@@ -66,29 +68,45 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
 
     final date = DateTime.now();
     final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-
+    final currentUser = AuthService().getCurrentUser();
+    final teacherUid = currentUser?.uid ?? 'unknown';
     try {
       for (var entry in attendanceMap.entries) {
         final studentId = entry.key;
         final isPresent = entry.value;
 
-        final attendanceRef = FirebaseFirestore.instance
+        // Saving inside student's attendance
+        await FirebaseFirestore.instance
             .collection('users')
             .doc(studentId)
             .collection('attendance')
-            .doc(selectedSubject!)  // ✅ Now grouped under subject
+            .doc(selectedSubject!)
             .collection('records')
-            .doc(dateString);
-
-        await attendanceRef.set({
+            .doc(dateString)
+            .set({
           'status': isPresent ? 'Present' : 'Absent',
           'timestamp': FieldValue.serverTimestamp(),
           'course': selectedCourse,
-          'year': selectedSem,
+          'semester': selectedSem,
           'section': selectedSection,
           'subject': selectedSubject,
         });
+
+        // Also saving inside teacher's attendance
+        await FirebaseFirestore.instance
+            .collection('teachers')
+            .doc(teacherUid)
+            .collection('attendance')
+            .doc('$selectedSubject - ${selectedCourse}_${selectedSem}_${selectedSection}')
+            .collection('records')
+            .doc(dateString)
+            .set({
+          'studentId': studentId,
+          'status': isPresent ? 'Present' : 'Absent',
+        });
       }
+
+
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Attendance submitted successfully!')),
@@ -100,11 +118,24 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
         selectedSubject = null;
       });
     } catch (e) {
-      print('Error submitting attendance: $e');
+      // print('Error submitting attendance: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to submit attendance')),
       );
     }
+  }
+  Stream<QuerySnapshot> getSubjectsStream() {
+    if (selectedCourse == null || selectedSem == null) {
+      return const Stream.empty();
+    }
+
+    return FirebaseFirestore.instance
+        .collection('courses')
+        .doc(selectedCourse)
+        .collection('semesters')
+        .doc(selectedSem)
+        .collection('subjects')
+        .snapshots();
   }
 
 
@@ -163,20 +194,37 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
             const SizedBox(height: 20),
             const SizedBox(height: 10),
 
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Select Subject'),
-              value: selectedSubject,
-              items: subjects.map((subject) => DropdownMenuItem(
-                value: subject,
-                child: Text(subject),
-              )).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedSubject = value!;
-                  loadStudentsFromFirestore(); // ⚡ Only load students once everything is selected
-                });
+            const SizedBox(height: 10),
+
+            StreamBuilder<QuerySnapshot>(
+              stream: getSubjectsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Text('No subjects found for selected course & semester');
+                }
+
+                final subjects = snapshot.data!.docs.map((doc) => doc['name'] as String).toList();
+
+                return DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Select Subject'),
+                  value: selectedSubject,
+                  items: subjects.map((subject) => DropdownMenuItem(
+                    value: subject,
+                    child: Text(subject),
+                  )).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedSubject = value!;
+                      loadStudentsFromFirestore(); // Load students once Subject is selected
+                    });
+                  },
+                );
               },
             ),
+
 
             // Students List
             if (students.isNotEmpty)
