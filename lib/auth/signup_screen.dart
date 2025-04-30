@@ -141,7 +141,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
-                    labelText: "Select Year",
+                    labelText: "Select Semester",
                     border: OutlineInputBorder(),
                   ),
                   value: _selectedSem,

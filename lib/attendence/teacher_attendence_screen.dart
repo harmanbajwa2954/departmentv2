@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:department/widgets/button.dart';
 import 'package:department/auth/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // import 'package:department/widgets/textfield.dart';
 
@@ -17,6 +18,8 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
   String? selectedSem;
   String? selectedSection;
   String? selectedSubject;
+  final teacherUid = FirebaseAuth.instance.currentUser?.uid ?? '';
+
 
 
 
@@ -87,23 +90,31 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
           'status': isPresent ? 'Present' : 'Absent',
           'timestamp': FieldValue.serverTimestamp(),
           'course': selectedCourse,
-          'semester': selectedSem,
+          'year': selectedSem,
           'section': selectedSection,
           'subject': selectedSubject,
         });
 
         // Also saving inside teacher's attendance
-        await FirebaseFirestore.instance
+
+        final attendanceRef = FirebaseFirestore.instance
             .collection('teachers')
             .doc(teacherUid)
             .collection('attendance')
             .doc('$selectedSubject - ${selectedCourse}_${selectedSem}_${selectedSection}')
             .collection('records')
-            .doc(dateString)
-            .set({
-          'studentId': studentId,
-          'status': isPresent ? 'Present' : 'Absent',
+            .doc(dateString);
+
+// Build a map of student attendance for the day
+        Map<String, String> attendanceData = {};
+
+        attendanceMap.forEach((studentId, isPresent) {
+          attendanceData[studentId] = isPresent ? 'Present' : 'Absent';
         });
+
+// Merge this map into the existing doc (if any)
+        await attendanceRef.set(attendanceData, SetOptions(merge: true));
+
       }
 
 
@@ -125,18 +136,20 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
     }
   }
   Stream<QuerySnapshot> getSubjectsStream() {
-    if (selectedCourse == null || selectedSem == null) {
+    final teacherUid = FirebaseAuth.instance.currentUser?.uid;
+    if (teacherUid == null || selectedCourse == null || selectedSem == null) {
       return const Stream.empty();
     }
 
     return FirebaseFirestore.instance
-        .collection('courses')
-        .doc(selectedCourse)
-        .collection('semesters')
-        .doc(selectedSem)
-        .collection('subjects')
+        .collection('teachers')
+        .doc(teacherUid)
+        .collection('attendance')
+        .where('course', isEqualTo: selectedCourse)
+        .where('year', isEqualTo: selectedSem)
         .snapshots();
   }
+
 
 
 
@@ -206,24 +219,28 @@ class _TeacherMarkAttendanceScreenState extends State<TeacherMarkAttendanceScree
                   return const Text('No subjects found for selected course & semester');
                 }
 
-                final subjects = snapshot.data!.docs.map((doc) => doc['name'] as String).toList();
+                final docs = snapshot.data!.docs;
 
                 return DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: 'Select Subject'),
                   value: selectedSubject,
-                  items: subjects.map((subject) => DropdownMenuItem(
-                    value: subject,
-                    child: Text(subject),
-                  )).toList(),
+                  items: docs.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    return DropdownMenuItem<String>(
+                      value: data['subject'],
+                      child: Text(data['subject']),
+                    );
+                  }).toList(),
                   onChanged: (value) {
                     setState(() {
                       selectedSubject = value!;
-                      loadStudentsFromFirestore(); // Load students once Subject is selected
+                      loadStudentsFromFirestore();
                     });
                   },
                 );
               },
             ),
+
 
 
             // Students List

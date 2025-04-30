@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:department/auth/auth_service.dart';
+import 'package:department/widgets/button.dart';
 import 'dart:io';
 
 class UploadStudyMaterialScreen extends StatefulWidget {
@@ -42,20 +43,19 @@ class _UploadStudyMaterialScreenState extends State<UploadStudyMaterialScreen> {
               decoration: const InputDecoration(labelText: "Material Title"),
             ),
             const SizedBox(height: 12),
-
+            TextButton.icon(onPressed: _pickFile, label: const Text("Select File"), icon: const Icon(Icons.attach_file)),
             // File Picker Section
-            ElevatedButton.icon(
-              icon: Icon(Icons.attach_file),
-              label: Text(_fileName != null ? "File: $_fileName" : "Choose PDF/Image"),
+            CustomButton(
+              label:  "Choose PDF/Image",
               onPressed: _pickFile,
             ),
 
             const SizedBox(height: 24),
             _isUploading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
+                : CustomButton(
               onPressed: _uploadMaterial,
-              child: const Text("Upload"),
+              label: "Upload",
             ),
           ],
         ),

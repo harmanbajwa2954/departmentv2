@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:department/widgets/button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:department/widgets/textfield.dart';
 
 class ManageSubjectsScreen extends StatefulWidget {
@@ -25,57 +26,49 @@ class _ManageSubjectsScreenState extends State<ManageSubjectsScreen> {
     super.dispose();
   }
 
-  Future<void> addSubject() async {
-    if (selectedCourse == null || selectedSemester == null || _subjectController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select course, semester and enter subject name')),
-      );
-      return;
-    }
+  Future<void> addSubject({
+    required String subjectName,
+    required String course,
+    required String year,
+    required String section,
+  }) async {
+    final teacherUid = FirebaseAuth.instance.currentUser?.uid;
 
-    try {
-      final subjectName = _subjectController.text.trim();
+    if (teacherUid == null) throw 'Not logged in as teacher';
 
-      final subjectRef = FirebaseFirestore.instance
-          .collection('courses')
-          .doc(selectedCourse)
-          .collection('semesters')
-          .doc(selectedSemester)
-          .collection('subjects')
-          .doc(subjectName);
+    final subjectId = '$subjectName - ${course}_$year\_$section';
 
-      await subjectRef.set({
-        'name': subjectName,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      _subjectController.clear();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Subject "$subjectName" added successfully!')),
-      );
-
-      setState(() {}); // Refresh UI
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to add subject')),
-      );
-    }
+    await FirebaseFirestore.instance
+        .collection('teachers')
+        .doc(teacherUid)
+        .collection('attendance')
+        .doc(subjectId)
+        .set({
+      'subject': subjectName,
+      'course': course,
+      'year': year,
+      'section': section,
+      'teacherId': teacherUid,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 
+
   Stream<QuerySnapshot> getSubjectsStream() {
-    if (selectedCourse == null || selectedSemester == null) {
+    final teacherUid = FirebaseAuth.instance.currentUser?.uid;
+    if (teacherUid == null || selectedCourse == null || selectedSemester == null) {
       return const Stream.empty();
     }
 
     return FirebaseFirestore.instance
-        .collection('courses')
-        .doc(selectedCourse)
-        .collection('semesters')
-        .doc(selectedSemester)
-        .collection('subjects')
+        .collection('teachers')
+        .doc(teacherUid)
+        .collection('attendance')
+        .where('course', isEqualTo: selectedCourse)
+        .where('year', isEqualTo: selectedSemester)
         .snapshots();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -129,8 +122,38 @@ class _ManageSubjectsScreenState extends State<ManageSubjectsScreen> {
                 ),
                 const SizedBox(width: 10),
                 CustomButton(
-                  onPressed: addSubject,
                   label: 'Add',
+                  onPressed: () async {
+                    if (_subjectController.text.trim().isEmpty ||
+                        selectedCourse == null ||
+                        selectedSemester == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please fill all fields')),
+                      );
+                      return;
+                    }
+
+                    try {
+                      await addSubject(
+                        subjectName: _subjectController.text.trim(),
+                        course: selectedCourse!,
+                        year: selectedSemester!,
+                        section: '12',
+                        // 🔁 Replace with actual selected section if applicable
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Subject added successfully')),
+                      );
+
+                      _subjectController.clear();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to add subject: $e')),
+                      );
+                    }
+                  },
+
                 ),
               ],
             ),
@@ -161,9 +184,13 @@ class _ManageSubjectsScreenState extends State<ManageSubjectsScreen> {
                     itemCount: subjects.length,
                     itemBuilder: (context, index) {
                       final subject = subjects[index];
+                      final data = subject.data() as Map<String, dynamic>;
                       return ListTile(
-                        title: Text(subject['name']),
+                        title: Text(data['subject'] ?? 'Unnamed Subject'),
+                        subtitle: Text('${data['course']} | ${data['semester']} | Section ${data['section']}'),
                       );
+
+
                     },
                   );
                 },

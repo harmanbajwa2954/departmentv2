@@ -17,12 +17,12 @@ class StudyMaterialsScreen extends StatelessWidget {
         File file = File(result.files.single.path!);
         String fileName = result.files.single.name;
 
-        // Upload file to Firebase Storage
+        // Upload to Firebase Storage
         final ref = FirebaseStorage.instance.ref('study_materials/$fileName');
         final uploadTask = await ref.putFile(file);
         final downloadUrl = await uploadTask.ref.getDownloadURL();
 
-        // Save file metadata to Firestore
+        // Save metadata to Firestore
         await FirebaseFirestore.instance.collection('study_materials').add({
           'uploadedBy': name,
           'fileName': fileName,
@@ -35,6 +35,7 @@ class StudyMaterialsScreen extends StatelessWidget {
         );
       }
     } catch (e) {
+      debugPrint('Upload error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Upload failed: $e')),
       );
@@ -53,8 +54,53 @@ class StudyMaterialsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text("Study materials will be shown here."),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('study_materials')
+            .orderBy('timestamp', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error loading materials: ${snapshot.error}'));
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No study materials uploaded.'));
+          }
+
+          final docs = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final material = docs[index].data() as Map<String, dynamic>;
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: ListTile(
+                  leading: const Icon(Icons.picture_as_pdf),
+                  title: Text(material['fileName'] ?? 'Unnamed'),
+                  subtitle: Text('Uploaded by: ${material['uploadedBy'] ?? 'Unknown'}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.open_in_new),
+                    onPressed: () async {
+                      final url = material['url'];
+                      if (url != null) {
+                        // Open in browser (or use url_launcher package for better UX)
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Opening in browser...')),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

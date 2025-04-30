@@ -10,6 +10,7 @@ import 'package:department/teacher/attendence_analytics_screen.dart';
 import 'package:department/teacher/view_complaints_screen.dart';
 // import 'package:department/teacher/TaskNotificationManagerScreen.dart';
 import 'package:department/teacher/SendAnnouncements.dart';
+import 'package:department/attendence/teacher_attendance_summary_screen.dart';
 
 
 class TeacherDashboard extends StatefulWidget {
@@ -82,8 +83,9 @@ class _TeacherDashboardState extends State<TeacherDashboard> {
 
             // Dashboard Options
             _buildDashboardOption(Icons.event_available, 'Manage Attendance', TeacherMarkAttendanceScreen()),
-            _buildDashboardOption(Icons.subject_rounded, 'Add Subjects', ManageSubjectsScreen()),
-            _buildDashboardOption(Icons.check_circle, 'Approve Study Materials', UploadStudyMaterialScreen()),
+            _buildDashboardOption(Icons.present_to_all, 'View Attendance Summary', TeacherAttendanceViewScreen()),
+            _buildDashboardOption(Icons.subject_rounded, 'Add Subjects for Attendance', ManageSubjectsScreen()),
+            _buildDashboardOption(Icons.check_circle, 'Upload Study Materials', UploadStudyMaterialScreen()),
             _buildDashboardOption(Icons.report_problem, 'View Complaints', ViewComplaintsScreen()),
             _buildDashboardOption(Icons.assignment_turned_in, 'Review Student Submissions', ReviewSubmissionsScreen()),
             _buildDashboardOption(Icons.notifications_active, 'Send Announcements', SendAnnouncementsScreen()),

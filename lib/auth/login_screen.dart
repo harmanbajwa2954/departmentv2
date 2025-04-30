@@ -39,15 +39,15 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
             const SizedBox(height: 80),
             const SizedBox(height: 40),
             Padding(
-              padding: const EdgeInsets.only(top: 40, bottom: 20),
+              padding: const EdgeInsets.only(top: 20, bottom: 20),
               child: Image.asset(
-                'lib/assets/ucoe'
+                'lib/assets/ucoe2'
                     '.png',
                 height: MediaQuery.of(context).size.height * 0.25, // 25% of screen height
                 width: MediaQuery.of(context).size.width * 0.8,     // 80% of screen width
