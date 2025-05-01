@@ -32,8 +32,10 @@ class ViewComplaintsScreen extends StatelessWidget {
             itemCount: complaints.length,
             itemBuilder: (context, index) {
               final complaint = complaints[index];
-              final title = complaint['title'] ?? 'No Title';
-              final description = complaint['description'] ?? 'No Description';
+              final data = complaint.data() as Map<String, dynamic>;
+              final title = data['title'] ?? 'Title';
+              final description = data['description'] ?? 'No Description';
+
 
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8.0),

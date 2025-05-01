@@ -57,7 +57,7 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
           .collection('users')
           .where('role', isEqualTo: 'student')
           .where('course', isEqualTo: widget.course)
-          .where('semester', isEqualTo: widget.semester)
+          .where('year', isEqualTo: widget.semester)
           .where('section', isEqualTo: widget.section)
           .get();
 
@@ -128,76 +128,73 @@ class _AttendanceDetailScreenState extends State<AttendanceDetailScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (attendanceData.isEmpty) {
+    if (attendanceData.isEmpty || studentNames.isEmpty) {
       return const Center(child: Text('No attendance records found'));
     }
 
     return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-            columnSpacing: 16,
-            horizontalMargin: 16,
-            headingRowHeight: 40,
-            dataRowMinHeight: 40,
-            dataRowMaxHeight: 60,
-          columns: [
-            const DataColumn(
-              label: Text('Student', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-            ...sortedDates.map((date) {
-              final shortDate = date.split('-').sublist(1).join('/'); // MM/DD
-              return DataColumn(
-                label: Tooltip(
-                  message: date,
-                  child: Text(shortDate),
-                ),
-              );
-            }).toList(),
-          ],
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columnSpacing: 16,
+        horizontalMargin: 16,
+        headingRowHeight: 40,
+        dataRowMinHeight: 40,
+        dataRowMaxHeight: 60,
+        columns: [
+          const DataColumn(
+            label: Text('Roll No.', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          ...sortedDates.map((date) {
+            final shortDate = date.split('-').sublist(1).join('/'); // MM/DD
+            return DataColumn(
+              label: Tooltip(
+                message: date,
+                child: Text(shortDate),
+              ),
+            );
+          }).toList(),
+        ],
+        rows: studentNames.entries.map((entry) {
+          final studentId = entry.key;
+          final studentName = entry.value;
 
-          rows: studentNames.entries.map((student) {
-    final studentId = student.key;
-    final studentName = student.value;
+          return DataRow(
+            cells: [
+              DataCell(Text(studentName)),
+              ...sortedDates.map((date) {
+                final status = attendanceData[date]?[studentId]?['status'] ?? '-';
+                final isPresent = status == 'Present';
 
-    return DataRow(
-    cells: [
-    DataCell(
-    SizedBox(
-    width: 150,
-    child: Text(
-    studentName,
-    overflow: TextOverflow.ellipsis,
-    ),
-    ),
-    ),
-    ...sortedDates.map((date) {
-    final status = attendanceData[date]?[studentId]?['status'] ?? '-';
-    final isPresent = status == 'Present';
-    return DataCell(
-    Container(
-    decoration: BoxDecoration(
-    color: isPresent ? Colors.green[50] : status == '-' ? null : Colors.red[50],
-    borderRadius: BorderRadius.circular(4),
-    ),
-    padding: const EdgeInsets.symmetric(horizontal: 8),
-    child: Center(
-    child: Text(
-    status,
-    style: TextStyle(
-    color: isPresent ? Colors.green : status == '-' ? Colors.grey : Colors.red,
-    fontWeight: FontWeight.bold,
-    ),
-    ),
-    ),
-    ),
-    );
-    }).toList(),
-    ],
-    );
-    }).toList(),
-    ),
+                return DataCell(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isPresent
+                          ? Colors.green[50]
+                          : (status == '-' ? null : Colors.red[50]),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Center(
+                      child: Text(
+                        status,
+                        style: TextStyle(
+                          color: isPresent
+                              ? Colors.green
+                              : (status == '-' ? Colors.grey : Colors.red),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
+
 
   Widget _buildStatsSection() {
     if (isLoading || attendanceData.isEmpty) return const SizedBox();
