@@ -64,13 +64,6 @@ complaints/
   └── title, description, timestamp, raisedBy\
 
 
-#setup :
-git clone https://github.com/your-org/department-management-app.git
-cd department-management-app
-flutter pub get
-flutterfire configure  # if using Firebase CLI
-flutter run
-
 
 A few resources to get you started if this is your first Flutter project:
 
