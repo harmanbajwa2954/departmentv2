@@ -1,4 +1,5 @@
-#Campus Core
+# Campus Core
+
 A Flutter-based Department Management System designed for colleges or universities to streamline academic administration for teachers, students, and HODs. It leverages Firebase for real-time data handling, authentication, and storage.
 
 🚀 Features
